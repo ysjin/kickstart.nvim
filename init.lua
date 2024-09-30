@@ -24,7 +24,7 @@ vim.opt.backup = true
 local home_backup_path = os.getenv('HOME') .. '/.backup'
 vim.opt.backupdir=home_backup_path
 
-vim.opt.errorbells=false 
+vim.opt.errorbells=false
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = ''
@@ -93,6 +93,8 @@ vim.opt.foldlevel = 5
 vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
 
+vim.opt.diffopt="internal,filler,closeoff,iwhite,linematch:60"
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -104,7 +106,7 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 -- Diagnostic keymaps
 --vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 --vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
---vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
+vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
@@ -142,6 +144,22 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   callback = function()
     vim.highlight.on_yank()
   end,
+})
+
+vim.api.nvim_create_autocmd('BufReadPost', {
+    pattern = { '*' },
+    desc = 'When editing a file, always jump to the last known cursor position',
+    callback = function()
+        local line = vim.fn.line '\'"'
+        if
+            line >= 1
+            and line <= vim.fn.line '$'
+            and vim.bo.filetype ~= 'commit'
+            and vim.fn.index({ 'xxd', 'gitrebase' }, vim.bo.filetype) == -1
+        then
+            vim.cmd 'normal! g`"'
+        end
+    end,
 })
 
 --vim.api.nvim_set_hl(0, '@lsp.type.comment.cpp', {})
@@ -591,8 +609,21 @@ require('lazy').setup({
           cmd = {'/home/utils/llvm-17.0.6/bin/clangd',
           "--background-index",
           "--clang-tidy",
-          "--header-insertion=iwyu",
+          "--header-insertion=never",
           "--j=2"},
+          init_options = {
+            clangdFileStatus = true,
+            inlayHints= {
+              enabled = true,
+              parameterNames = true,
+              autoDeducedTypes = true,  -- Enable auto type hints
+              typeHints = true,
+              typeNameLimit = 24,
+              lambdaReturnType = true,
+              blockEnd = true,
+              designators = true,
+            },
+          },
           filetypes = {"cpp"},
           single_file_support = true,
           capabilities = capabilities,
@@ -714,6 +745,7 @@ require('lazy').setup({
       {
         'L3MON4D3/LuaSnip',
         build = (function()
+          CC={"/home/utils/gcc-14.1.0/bin/gcc"}
           -- Build Step is needed for regex support in snippets.
           -- This step is not supported in many windows environments.
           -- Remove the below condition to re-enable on windows.
@@ -730,8 +762,7 @@ require('lazy').setup({
             'rafamadriz/friendly-snippets',
             config = function()
               require('luasnip.loaders.from_vscode').lazy_load({ include={"cpp", "python", "lua"} })
-              local snip_loader = require('luasnip.loaders.from_vscode')
-              snip_loader.lazy_load({ paths = vim.fn.stdpath("config").."/snippets/" })
+              require('luasnip.loaders.from_vscode').lazy_load({ paths = vim.fn.stdpath("config").."/snippets/" })
             end,
           },
         },
@@ -829,18 +860,19 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    --'folke/tokyonight.nvim',
-    'catppuccin/nvim',
+    'folke/tokyonight.nvim',
+    --'catppuccin/nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     init = function()
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      --vim.cmd.colorscheme 'tokyonight-night'
-      vim.cmd.colorscheme 'catppuccin-mocha'
+      vim.cmd.colorscheme 'tokyonight-night'
+      --vim.cmd.colorscheme 'catppuccin-mocha'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
+      vim.api.nvim_set_hl(0, "LspInlayHint", {fg = "#9DA9A0", bg="#000000" })
     end,
   },
 
@@ -894,7 +926,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'diff', 'lua',  'cpp', 'python'},
+      ensure_installed = { 'bash', 'diff', 'lua',  'cpp', 'python', 'json'},
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = { enable = true, },
@@ -909,45 +941,6 @@ require('lazy').setup({
     --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
-  },
-  { 'ngemily/vim-vp4',
-      lazy = true,
-      event = "BufModifiedSet",
-      cmd = {"Vp4Diff", "Vp4Annotate"},
-  },
-  { 'AndrewRadev/linediff.vim',
-      lazy = true,
-      cmd = "Linediff",
-  },
-  { 'junegunn/vim-easy-align',
-      lazy = true,
-      cmd="EasyAlign"
-  },
-  {
-    'pteroctopus/faster.nvim',
-    opts = {
-      behaviors = {
-        bigfile = {
-          features_disabled = {
-            "illuminate", "matchparen", "lsp", "treesitter", "indent_blankline",
-            "vimopts", "syntax", "filetype", "linediff", "vim-vp4", "vim-easy-align", "telescope" 
-          },
-          filesize = 3,
-        }
-      },
-    },
-  },
-  --{
-  --   "m4xshen/hardtime.nvim",
-  --   dependencies = { "MunifTanjim/nui.nvim", "nvim-lua/plenary.nvim" },
-  --   opts = {
-  --     max_count = 10,
-  --     restriction_mode = "hint",
-  --   }
-  --},
-  {
-    'ckipp01/nvim-jenkinsfile-linter', 
-    requires = { "nvim-lua/plenary.nvim" }
   },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
@@ -971,7 +964,7 @@ require('lazy').setup({
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
