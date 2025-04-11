@@ -1,1 +1,0 @@
-# personal kickstart.nvim fork
