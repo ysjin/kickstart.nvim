@@ -171,6 +171,11 @@ vim.api.nvim_create_autocmd('BufReadPost', {
     end,
 })
 
+vim.api.nvim_create_autocmd({"BufNewFile", "BufRead"}, {
+  pattern = "*.jenkinsfile",
+  command = "setfiletype groovy"
+})
+
 --vim.api.nvim_set_hl(0, '@lsp.type.comment.cpp', {})
 
 -- [[ Install `lazy.nvim` plugin manager ]]
@@ -795,6 +800,7 @@ require('lazy').setup({
     --- @type blink.cmp.Config
     opts = {
       keymap = {
+        ["<C-Space>"] = {"show", "show_documentation", "hide_documentation"},
         -- 'default' (recommended) for mappings similar to built-in completions
         --   <c-y> to accept ([y]es) the completion.
         --    This will auto-import if your LSP supports it.
@@ -835,7 +841,7 @@ require('lazy').setup({
       },
 
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'lazydev' },
+        default = { 'lsp', 'buffer', 'path', 'snippets', 'lazydev' },
         providers = {
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
         },
@@ -862,25 +868,27 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
+    --'folke/tokyonight.nvim',
+    'EdenEast/nightfox.nvim',
     --'catppuccin/nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
-      }
+    --  ---@diagnostic disable-next-line: missing-fields
+    --  require('tokyonight').setup {
+    --    styles = {
+    --      comments = { italic = false }, -- Disable italics in comments
+    --    },
+    --  }
 
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
-      --vim.cmd.colorscheme 'catppuccin-mocha'
-      -- You can configure highlights by doing something like:
-      vim.cmd.hi 'Comment gui=none'
-      vim.api.nvim_set_hl(0, "LspInlayHint", {fg = "#9DA9A0", bg="#000000" })
+    --  -- Load the colorscheme here.
+    --  -- Like many other themes, this one has different styles, and you could load
+    --  -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+      vim.cmd.colorscheme 'carbonfox'
+    --  vim.cmd.colorscheme 'tokyonight-night'
+    --  --vim.cmd.colorscheme 'catppuccin-mocha'
+    --  -- You can configure highlights by doing something like:
+    --  vim.cmd.hi 'Comment gui=none'
+    --  vim.api.nvim_set_hl(0, "LspInlayHint", {fg = "#9DA9A0", bg="#000000" })
     end,
   },
 
