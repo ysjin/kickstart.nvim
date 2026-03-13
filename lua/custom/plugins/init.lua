@@ -16,20 +16,20 @@ return {
       lazy = true,
       cmd="EasyAlign"
   },
-  {
-    'pteroctopus/faster.nvim',
-    opts = {
-      behaviors = {
-        bigfile = {
-          features_disabled = {
-            "illuminate", "matchparen", "lsp", "treesitter", "indent_blankline",
-            "vimopts", "syntax", "filetype", "linediff", "vim-vp4", "vim-easy-align", "telescope" 
-          },
-          filesize = 3,
-        }
-      },
-    },
-  },
+  --{
+  --  'pteroctopus/faster.nvim',
+  --  opts = {
+  --    behaviors = {
+  --      bigfile = {
+  --        features_disabled = {
+  --          "illuminate", "matchparen", "lsp", "treesitter", "indent_blankline",
+  --          "vimopts", "syntax", "filetype", "linediff", "vim-vp4", "vim-easy-align", "telescope" 
+  --        },
+  --        filesize = 3,
+  --      }
+  --    },
+  --  },
+  --},
   --{
   --   "m4xshen/hardtime.nvim",
   --   dependencies = { "MunifTanjim/nui.nvim", "nvim-lua/plenary.nvim" },
@@ -38,18 +38,18 @@ return {
   --     restriction_mode = "hint",
   --   }
   --},
-  {
-     "gbprod/substitute.nvim",
-     config = function()
-        vim.keymap.set("n", "s", require('substitute').operator, { noremap = true })
-        vim.keymap.set("n", "ss", require('substitute').line, { noremap = true })
-        vim.keymap.set("n", "S", require('substitute').eol, { noremap = true })
-        vim.keymap.set("x", "s", require('substitute').visual, { noremap = true })
-     end,
-     opts = {
-         -- your configuration comes here
-         -- or leave it empty to use the default settings
-         -- refer to the configuration section below
-     }
-   },
+  --{
+  --   "gbprod/substitute.nvim",
+  --   config = function()
+  --      vim.keymap.set("n", "s", require('substitute').operator, { noremap = true })
+  --      vim.keymap.set("n", "ss", require('substitute').line, { noremap = true })
+  --      vim.keymap.set("n", "S", require('substitute').eol, { noremap = true })
+  --      vim.keymap.set("x", "s", require('substitute').visual, { noremap = true })
+  --   end,
+  --   opts = {
+  --       -- your configuration comes here
+  --       -- or leave it empty to use the default settings
+  --       -- refer to the configuration section below
+  --   }
+  -- },
 }
